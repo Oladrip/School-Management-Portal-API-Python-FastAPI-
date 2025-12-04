@@ -1,14 +1,7 @@
 from functools import lru_cache
-from typing import (
-    Any,
-    Dict,
-    Optional,
-)
-from pydantic import (
-    BaseSettings,
-    PostgresDsn,
-    validator
-)
+from typing import Optional
+from pydantic import PostgresDsn, field_validator, ValidationInfo
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -20,21 +13,26 @@ class Settings(BaseSettings):
     DB_PASSWORD: str
     DB_NAME: str
 
+    SECRET_KEY: str = "your-secret-key-here-change-in-production"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
+
     SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
 
-    @validator("SQLALCHEMY_DATABASE_URI", pre=True)
+    @field_validator("SQLALCHEMY_DATABASE_URI", mode="before")
     def assemble_db_connection(
-        cls, v: Optional[str], values: Dict[str, Any]
-    ) -> Any:
+        cls, v: Optional[str], info: ValidationInfo
+    ) -> str:
         if isinstance(v, str):
             return v
-        return PostgresDsn.build(
+        # Build PostgreSQL URL - Pydantic v2 PostgresDsn.build expects path WITHOUT leading slash
+        db_name = info.data.get('DB_NAME') or ''
+        return str(PostgresDsn.build(
             scheme="postgresql",
-            user=values.get("DB_USER"),
-            password=values.get("DB_PASSWORD"),
-            host=values.get("DB_HOST"),
-            path=f"/{values.get('DB_NAME') or  ''}",
-        )
+            username=info.data.get("DB_USER"),
+            password=info.data.get("DB_PASSWORD"),
+            host=info.data.get("DB_HOST"),
+            path=db_name,  # Just the database name, no leading slash
+        ))
 
     class Config:
         case_sensitive = True

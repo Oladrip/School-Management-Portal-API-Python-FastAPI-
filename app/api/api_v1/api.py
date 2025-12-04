@@ -6,6 +6,7 @@ from app.api.api_v1.routes import (
     school_year,
     student,
     nationality,
+    login,
 )
 
 api_router = APIRouter()
@@ -16,3 +17,4 @@ api_router.include_router(school_year.router)
 api_router.include_router(student.router)
 api_router.include_router(registration.router)
 api_router.include_router(nationality.router)
+api_router.include_router(login.router, tags=["login"])

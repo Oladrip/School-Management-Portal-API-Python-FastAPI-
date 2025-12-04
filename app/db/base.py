@@ -9,3 +9,4 @@ from app.models.student import Student  # noqa
 from app.models.grade_subject import GradeSubject  # noqa
 from app.models.registration import Registration  # noqa
 from app.models.nationality import Nationality  # noqa
+from app.models.user import User  # noqa

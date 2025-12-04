@@ -1,10 +1,7 @@
 import re
-from datetime import date
-from datetime import datetime
-from pydantic import (
-    BaseModel,
-    validator
-)
+from datetime import date, datetime
+from typing import Optional
+from pydantic import BaseModel, field_validator
 from app.schemas.nationality import NationalityInDB
 
 
@@ -17,35 +14,35 @@ class Base(BaseModel):
     date_of_birth: date
     guardian_phone_no: str
 
-    @validator("first_name")
+    @field_validator("first_name")
     def validate_first_name(cls, value: str):
         value = value.strip()
         if not value:
             raise ValueError('First name must not be empty.')
         return value
 
-    @validator("father_name")
+    @field_validator("father_name")
     def validate_father_name(cls, value: str):
         value = value.strip()
         if not value:
             raise ValueError('Father name must not be empty.')
         return value
 
-    @validator("gfather_name")
+    @field_validator("gfather_name")
     def validate_gfather_name(cls, value: str):
         value = value.strip()
         if not value:
             raise ValueError('Grand Father name must not be empty.')
         return value
 
-    @validator("last_name")
+    @field_validator("last_name")
     def validate_last_name(cls, value: str):
         value = value.strip()
         if not value:
             raise ValueError('Last name must not be empty.')
         return value
 
-    @validator("date_of_birth", pre=True)
+    @field_validator("date_of_birth", mode="before")
     def parse_date_of_birth(cls, value):
         if isinstance(value, date):
             return value
@@ -54,7 +51,7 @@ class Base(BaseModel):
             "%Y-%m-%d"
         ).date()
 
-    @validator("guardian_phone_no")
+    @field_validator("guardian_phone_no")
     def validate_guardian_phone_no(cls, value: str):
         value = value.strip()
         if not value:
@@ -78,4 +75,4 @@ class StudentInDB(Base):
     nationality: NationalityInDB
 
     class Config:
-        orm_mode = True
+        from_attributes = True

@@ -1,7 +1,4 @@
-from pydantic import (
-    BaseModel,
-    validator
-)
+from pydantic import BaseModel, field_validator
 from .student import StudentInDB
 from .grade import GradeInDB
 from .school_year import SchoolYearInDB
@@ -13,7 +10,7 @@ class Base(BaseModel):
     grade_id: int
     school_year_id: int
 
-    @validator("regi_no")
+    @field_validator("regi_no")
     def validate_regi_no(cls, value: str):
         value = value.strip()
         if not value:
@@ -42,4 +39,4 @@ class RegistrationOut(BaseModel):
     school_year: SchoolYearInDB
 
     class Config:
-        orm_mode = True
+        from_attributes = True
